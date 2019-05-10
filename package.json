@@ -1,0 +1,33 @@
+{
+  "name": "@opd/crawler",
+  "version": "0.0.1",
+  "description": "web crawler based on Puppeteer",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/open-data-plan/crawler.git"
+  },
+  "keywords": [
+    "crawler",
+    "puppeteer",
+    "headless-chrome"
+  ],
+  "author": "kagawagao <kingsongao1221@gmail.com> (https://kingsongao.com/)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/open-data-plan/crawler/issues"
+  },
+  "homepage": "https://github.com/open-data-plan/crawler#readme",
+  "devDependencies": {
+    "@types/jest": "^24.0.12",
+    "jest": "^24.8.0",
+    "tslint": "^5.16.0",
+    "typescript": "^3.4.5"
+  },
+  "dependencies": {
+    "puppeteer": "^1.15.0"
+  }
+}
