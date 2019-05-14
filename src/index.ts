@@ -91,13 +91,23 @@ export default class Crawler extends EventEmitter {
   }
 
   public queue = (urls: string | string[]) => {
-    if (Array.isArray(urls)) {
-      this.urls = this.urls.concat(urls)
-    } else {
-      this.urls.push(urls)
+    if (typeof urls === 'string') {
+      urls = [urls]
     }
-
-    this.urls = this.urls.filter(this.checkUrl)
+    if (Array.isArray(urls)) {
+      this.urls = this.urls.concat(urls.filter(this.checkUrl))
+      const invalidUrls = urls.filter(url => !this.checkUrl(url))
+      if (invalidUrls.length) {
+        console.log('follow url(s) will be ignored:\n')
+        invalidUrls.map(url => {
+          console.log(url)
+        })
+      }
+    } else {
+      throw new TypeError(
+        'Invalid url(s) present, only support string or string[]'
+      )
+    }
   }
 
   public crawl = async (): Promise<any> => {
