@@ -1,4 +1,5 @@
 import puppeteer, { LaunchOptions, Browser, Page, EvaluateFn } from 'puppeteer'
+import EventEmitter from 'events'
 
 export type NextFunc = () => string[]
 
@@ -9,19 +10,75 @@ export interface CrawlerOptions {
   [x: string]: any
 }
 
-export default class Crawler {
-  private queue: string[] = []
+interface PageInfo {
+  url: string
+  result: any
+}
+interface CrawlPage {
+  [id: number]: PageInfo
+}
+
+const noop = () => {}
+
+export default class Crawler extends EventEmitter {
+  private urls: string[] = []
+  private crawledUrlSet: Set<string> = new Set()
   private parallel: number = 5
   private browser?: Browser
   private pageEvaluate: EvaluateFn
   private next: NextFunc
+  private pageId: number = 0
+  private pages: CrawlPage = {}
 
   constructor(options: CrawlerOptions) {
-    const { parallel = 5, pageEvaluate, next } = options
-    this.queue = []
+    super()
+    const { parallel = 5, pageEvaluate = noop, next } = options
     this.parallel = parallel
     this.pageEvaluate = pageEvaluate
     this.next = next
+    new Proxy(this.pages, {
+      set: (target: CrawlPage, name: number, value: PageInfo) => {
+        target[name] = value
+        if (this.urls.length) {
+          const url = this.urls.shift() as string
+          this.crawlPage(url)
+        } else {
+          const ids = Object.keys(this.pages).map(id => +id)
+          const result = ids.map((pageId: number) => {
+            return this.pages[pageId]
+          })
+          this.emit('end', result)
+        }
+        return true
+      }
+    })
+  }
+
+  private checkUrl = (url: string) => {
+    if (
+      typeof url !== 'string' ||
+      !/^https?:\/\//.test(url) ||
+      this.crawledUrlSet.has(url)
+    ) {
+      return false
+    }
+    return true
+  }
+
+  private crawlPage = async (url: string) => {
+    if (!this.browser) {
+      throw new TypeError('You should launch browser firstly')
+    }
+    const pageId = this.pageId++
+    const page: Page = await this.browser.newPage()
+    this.crawledUrlSet.add(url)
+    await page.goto(url)
+    const res = await page.evaluate(this.pageEvaluate)
+    await page.close()
+    this.pages[pageId] = {
+      url,
+      result: res
+    }
   }
 
   public launch = async (options: LaunchOptions): Promise<Browser> => {
@@ -33,13 +90,20 @@ export default class Crawler {
     }
   }
 
-  public crawl = async (url: string): Promise<any> => {
-    if (!this.browser) return
+  public queue = (urls: string | string[]) => {
+    if (Array.isArray(urls)) {
+      this.urls = this.urls.concat(urls)
+    } else {
+      this.urls.push(urls)
+    }
+
+    this.urls = this.urls.filter(this.checkUrl)
+  }
+
+  public crawl = async (): Promise<any> => {
     try {
-      const page: Page = await this.browser.newPage()
-      await page.goto(url)
-      const res = await page.evaluate(this.pageEvaluate)
-      return res
+      const urls = this.urls.splice(0, this.parallel)
+      urls.map(this.crawlPage)
     } catch (error) {
       throw error
     }
