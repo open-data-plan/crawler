@@ -6,7 +6,7 @@ export type NextFunc = () => string[]
 export interface CrawlerOptions {
   parallel?: number
   pageEvaluate: EvaluateFn
-  next: NextFunc
+  next?: NextFunc
   [x: string]: any
 }
 
@@ -14,30 +14,30 @@ interface PageInfo {
   url: string
   result: any
 }
-interface CrawlPage {
+interface CrawledPage {
   [id: number]: PageInfo
 }
 
 const noop = () => {}
 
 export default class Crawler extends EventEmitter {
-  private urls: string[] = []
   private crawledUrlSet: Set<string> = new Set()
   private parallel: number = 5
-  private browser?: Browser
   private pageEvaluate: EvaluateFn
   private next: NextFunc
   private pageId: number = 0
-  private pages: CrawlPage = {}
+  private pages: CrawledPage = {}
+  public urls: string[] = []
+  public browser?: Browser
 
   constructor(options: CrawlerOptions) {
     super()
-    const { parallel = 5, pageEvaluate = noop, next } = options
+    const { parallel = 5, pageEvaluate = noop, next = () => [] } = options
     this.parallel = parallel
     this.pageEvaluate = pageEvaluate
     this.next = next
     new Proxy(this.pages, {
-      set: (target: CrawlPage, name: number, value: PageInfo) => {
+      set: (target: CrawledPage, name: number, value: PageInfo) => {
         target[name] = value
         if (this.urls.length) {
           const url = this.urls.shift() as string
@@ -69,19 +69,27 @@ export default class Crawler extends EventEmitter {
     if (!this.browser) {
       throw new TypeError('You should launch browser firstly')
     }
-    const pageId = this.pageId++
-    const page: Page = await this.browser.newPage()
-    this.crawledUrlSet.add(url)
-    await page.goto(url)
-    const res = await page.evaluate(this.pageEvaluate)
-    await page.close()
-    this.pages[pageId] = {
-      url,
-      result: res
+    try {
+      const pageId = this.pageId++
+      const page = await this.browser.newPage()
+      this.crawledUrlSet.add(url)
+      await page.goto(url)
+      const res = await page.evaluate(this.pageEvaluate)
+      await page.close()
+      this.pages[pageId] = {
+        url,
+        result: res
+      }
+    } catch (error) {
+      console.log(error)
     }
   }
 
-  public launch = async (options: LaunchOptions): Promise<Browser> => {
+  /**
+   * launch puppeteer
+   * @param options LaunchOptions puppeteer launch options
+   */
+  public launch = async (options?: LaunchOptions): Promise<Browser> => {
     try {
       this.browser = await puppeteer.launch(options)
       return this.browser
@@ -90,6 +98,10 @@ export default class Crawler extends EventEmitter {
     }
   }
 
+  /**
+   * push url(s) into crawl pool
+   * @param urls string | string[]
+   */
   public queue = (urls: string | string[]) => {
     if (typeof urls === 'string') {
       urls = [urls]
@@ -110,18 +122,24 @@ export default class Crawler extends EventEmitter {
     }
   }
 
+  /**
+   * crawl queued urls
+   */
   public crawl = async (): Promise<any> => {
     try {
-      const urls = this.urls.splice(0, this.parallel)
+      const urls = this.urls.splice(0, this.parallel).filter(Boolean)
       urls.map(this.crawlPage)
     } catch (error) {
       throw error
     }
   }
 
+  /**
+   * close crawler browser
+   */
   public close = async () => {
     if (this.browser) {
-      this.browser.close()
+      await this.browser.close()
     }
   }
 }
