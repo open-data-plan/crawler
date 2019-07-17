@@ -75,8 +75,6 @@ export default class Crawler {
           .splice(0, this.parallel - this.pendingQueue.length)
           .filter(Boolean)
           .map(this.crawlPage)
-      } else {
-        return this.pages
       }
     } catch (error) {
       console.log(error)
