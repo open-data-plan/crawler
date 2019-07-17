@@ -62,3 +62,6 @@ typings/
 
 # output of build
 lib/
+
+# typings
+*.d.ts
