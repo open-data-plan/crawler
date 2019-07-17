@@ -4,10 +4,14 @@
   "description": "web crawler based on Puppeteer",
   "main": "lib/index.js",
   "scripts": {
+    "pretest": "npm run lint",
     "test": "jest",
+    "prebuild": "npm test",
     "build": "tsc",
     "lint": "prettier --check *.{ts,js,css,json,md}",
-    "lint:fix": "prettier --write *.{ts,js,css,json,md}"
+    "lint:fix": "prettier --write *.{ts,js,css,json,md}",
+    "preversion": "npm run build",
+    "prepublishOnly": "tsc"
   },
   "repository": {
     "type": "git",
