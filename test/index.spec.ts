@@ -1,4 +1,28 @@
-import Crawler from '../src'
+import MockServer from 'mock-http-server'
+import Crawler, { CrawledPage } from '../src'
+
+const server = new MockServer({ host: 'localhost', port: 9000 }, null)
+
+const createPage = (id: string) => {
+  server.on({
+    method: 'GET',
+    path: `/${id}`,
+    reply: {
+      status: 200,
+      headers: { 'content-type': 'text/html' },
+      body: `<div id="node">${id}</div>`
+    }
+  })
+  return `http://localhost:9000/${id}`
+}
+
+beforeEach(done => {
+  server.start(done)
+})
+
+afterEach(done => {
+  server.stop(done)
+})
 
 describe('Crawler', () => {
   it('new', async () => {
@@ -14,14 +38,21 @@ describe('Crawler', () => {
 
 describe('launch and close', () => {
   it('launch and close', async () => {
+    const pageNames = ['test', 'demo']
+    const urls = pageNames.map(createPage)
     const crawler = new Crawler({
+      parallel: 1,
       pageEvaluate: () => {
-        console.log(location.href)
+        return document.querySelector('#node').innerHTML
       }
     })
+    crawler.queue(urls)
     await crawler.launch()
-    expect(crawler.browser).toBeDefined()
+    const result = await crawler.crawl()
     await crawler.close()
+    Object.entries(result as CrawledPage).map(([, pageResult], index) => {
+      expect(pageResult.result).toBe(pageNames[index])
+    })
   })
 })
 
@@ -29,7 +60,7 @@ describe('queue', () => {
   it('queue url', () => {
     const crawler = new Crawler({
       pageEvaluate: () => {
-        console.log(location.href)
+        return location.href
       }
     })
     crawler.queue('https://baidu.com')

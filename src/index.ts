@@ -1,5 +1,4 @@
-import puppeteer, { LaunchOptions, Browser, Page, EvaluateFn } from 'puppeteer'
-import EventEmitter from 'events'
+import puppeteer, { LaunchOptions, Browser, EvaluateFn } from 'puppeteer'
 
 export type NextFunc = () => string[]
 
@@ -10,17 +9,17 @@ export interface CrawlerOptions {
   [x: string]: any
 }
 
-interface PageInfo {
+export interface PageInfo {
   url: string
   result: any
 }
-interface CrawledPage {
+export interface CrawledPage {
   [id: number]: PageInfo
 }
 
 const noop = () => {}
 
-export default class Crawler extends EventEmitter {
+export default class Crawler {
   private crawledUrlSet: Set<string> = new Set()
   private parallel: number = 5
   private pageEvaluate: EvaluateFn
@@ -31,27 +30,10 @@ export default class Crawler extends EventEmitter {
   public browser?: Browser
 
   constructor(options: CrawlerOptions) {
-    super()
     const { parallel = 5, pageEvaluate = noop, next = () => [] } = options
     this.parallel = parallel
     this.pageEvaluate = pageEvaluate
     this.next = next
-    new Proxy(this.pages, {
-      set: (target: CrawledPage, name: number, value: PageInfo) => {
-        target[name] = value
-        if (this.urls.length) {
-          const url = this.urls.shift() as string
-          this.crawlPage(url)
-        } else {
-          const ids = Object.keys(this.pages).map(id => +id)
-          const result = ids.map((pageId: number) => {
-            return this.pages[pageId]
-          })
-          this.emit('end', result)
-        }
-        return true
-      }
-    })
   }
 
   private checkUrl = (url: string) => {
@@ -74,11 +56,16 @@ export default class Crawler extends EventEmitter {
       const page = await this.browser.newPage()
       this.crawledUrlSet.add(url)
       await page.goto(url)
-      const res = await page.evaluate(this.pageEvaluate)
+      const result = await page.evaluate(this.pageEvaluate)
       await page.close()
       this.pages[pageId] = {
         url,
-        result: res
+        result
+      }
+      if (this.urls.length) {
+        await this.crawlPage(this.urls.shift() as string)
+      } else {
+        return this.pages
       }
     } catch (error) {
       console.log(error)
@@ -128,7 +115,8 @@ export default class Crawler extends EventEmitter {
   public crawl = async (): Promise<any> => {
     try {
       const urls = this.urls.splice(0, this.parallel).filter(Boolean)
-      urls.map(this.crawlPage)
+      await Promise.all(urls.map(this.crawlPage))
+      return this.pages
     } catch (error) {
       throw error
     }
