@@ -2,6 +2,11 @@
 
 > Web crawler based on [`Puppeteer`](https://github.com/GoogleChrome/puppeteer)
 
+[![node (scoped)](https://img.shields.io/node/v/@opd/crawler.svg)](https://www.npmjs.com/package/@opd/crawler)
+[![npm (scoped)](https://img.shields.io/npm/v/@opd/crawler.svg)](https://www.npmjs.com/package/@opd/crawler)
+[![Build Status](https://travis-ci.org/open-data-plan/crawler.svg?branch=master)](https://travis-ci.org/open-data-plan/crawler)
+[![Coverage Status](https://coveralls.io/repos/github/open-data-plan/crawler/badge.svg?branch=master)](https://coveralls.io/github/open-data-plan/crawler?branch=master)
+
 ## Install
 
 ```bash
