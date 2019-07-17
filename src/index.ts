@@ -26,6 +26,7 @@ export default class Crawler {
   private next: NextFunc
   private pageId: number = 0
   private pages: CrawledPage = {}
+  private pendingQueue: string[] = []
   public urls: string[] = []
   public browser?: Browser
 
@@ -62,8 +63,18 @@ export default class Crawler {
         url,
         result
       }
+      // TODO: add next func support
+      // find current url in pending queue
+      const currentIndex = this.pendingQueue.findIndex(
+        queuedUrl => url === queuedUrl
+      )
+      // remove it from pending queue
+      this.pendingQueue.splice(currentIndex, 1)
       if (this.urls.length) {
-        await this.crawlPage(this.urls.shift() as string)
+        await this.urls
+          .splice(0, this.parallel - this.pendingQueue.length)
+          .filter(Boolean)
+          .map(this.crawlPage)
       } else {
         return this.pages
       }
@@ -112,10 +123,16 @@ export default class Crawler {
   /**
    * crawl queued urls
    */
-  public crawl = async (): Promise<any> => {
+  public start = async (urls?: string[] | string): Promise<any> => {
     try {
-      const urls = this.urls.splice(0, this.parallel).filter(Boolean)
-      await Promise.all(urls.map(this.crawlPage))
+      if (!this.browser) {
+        await this.launch()
+      }
+      if (urls) {
+        this.queue(urls)
+      }
+      this.pendingQueue = this.urls.splice(0, this.parallel).filter(Boolean)
+      await Promise.all(this.pendingQueue.map(this.crawlPage))
       return this.pages
     } catch (error) {
       throw error

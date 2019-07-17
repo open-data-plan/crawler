@@ -48,7 +48,7 @@ describe('launch and close', () => {
     })
     crawler.queue(urls)
     await crawler.launch()
-    const result = await crawler.crawl()
+    const result = await crawler.start()
     await crawler.close()
     Object.entries(result as CrawledPage).map(([, pageResult], index) => {
       expect(pageResult.result).toBe(pageNames[index])
