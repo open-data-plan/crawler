@@ -9,12 +9,9 @@ export interface CrawlerOptions {
   [x: string]: any
 }
 
-export interface PageInfo {
+export interface PageResult {
   url: string
   result: any
-}
-export interface CrawledPage {
-  [id: number]: PageInfo
 }
 
 const noop = () => {}
@@ -25,7 +22,7 @@ export default class Crawler {
   private pageEvaluate: EvaluateFn
   private next: NextFunc
   private pageId: number = 0
-  private pages: CrawledPage = {}
+  private pages: PageResult[] = []
   private pendingQueue: string[] = []
   public urls: string[] = []
   public browser?: Browser
@@ -59,10 +56,10 @@ export default class Crawler {
       await page.goto(url)
       const result = await page.evaluate(this.pageEvaluate)
       await page.close()
-      this.pages[pageId] = {
+      this.pages.push({
         url,
         result
-      }
+      })
       // TODO: add next func support
       // find current url in pending queue
       const currentIndex = this.pendingQueue.findIndex(
@@ -121,7 +118,7 @@ export default class Crawler {
   /**
    * crawl queued urls
    */
-  public start = async (urls?: string[] | string): Promise<any> => {
+  public start = async (urls?: string[] | string): Promise<PageResult[]> => {
     try {
       if (!this.browser) {
         await this.launch()
