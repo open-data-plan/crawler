@@ -42,7 +42,7 @@ add urls to crawler queue
 
 > Note: check url **strictly**, means url must start with `https?`
 
-### `crawler.start([urls]): CrawledPage`
+### `crawler.start([urls]): PageResult[]`
 
 start crawl page, if `urls` is presented, will call `crawler.queue` firstly.
 
@@ -50,12 +50,12 @@ start crawl page, if `urls` is presented, will call `crawler.queue` firstly.
 const result = await crawler.start()
 console.log(result)
 
-// {
-//   [pageId]: {
+// [
+//   {
 //     url, // page url
 //     result // crawled result
 //   }
-// }
+// ]
 ```
 
 > Note: if you call `start` before `launch`, `browser` will also be launched, but with no extra launch options
