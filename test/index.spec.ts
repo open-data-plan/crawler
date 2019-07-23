@@ -1,5 +1,5 @@
 import MockServer from 'mock-http-server'
-import Crawler, { CrawledPage } from '../src'
+import Crawler from '../src'
 
 const server = new MockServer({ host: 'localhost', port: 9000 }, null)
 
@@ -50,8 +50,8 @@ describe('launch and close', () => {
     await crawler.launch()
     const result = await crawler.start()
     await crawler.close()
-    Object.entries(result as CrawledPage).map(([, pageResult], index) => {
-      expect(pageResult.result).toBe(pageNames[index])
+    result.map(({ url, result }) => {
+      expect(url.includes(result)).toBeTruthy()
     })
   })
 })
