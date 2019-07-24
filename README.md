@@ -17,6 +17,8 @@ npm install @opd/crawler
 
 ```js
 import Crawler from '@opd/crawler'
+// or commonjs
+const Crawler = require('@opd/crawler').default
 
 const crawler = new Crawler(options)
 ```
