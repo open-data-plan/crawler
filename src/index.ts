@@ -1,6 +1,6 @@
-import puppeteer, { LaunchOptions, Browser, EvaluateFn } from 'puppeteer'
+import puppeteer, { LaunchOptions, Browser, EvaluateFn, Page } from 'puppeteer'
 
-export type NextFunc = () => string[]
+export type NextFunc = (result: PageResult, page: Page) => void
 
 export interface CrawlerOptions {
   parallel?: number
@@ -44,7 +44,7 @@ export default class Crawler {
     return true
   }
 
-  private crawlPage = async (url: string) => {
+  private crawlPage = async (url: string): Promise<void> => {
     if (!this.browser) {
       throw new TypeError('You should launch browser firstly')
     }
@@ -57,20 +57,25 @@ export default class Crawler {
         url,
         result
       })
-      // TODO: add next func support
-      // find current url in pending queue
+
       const currentIndex = this.pendingQueue.findIndex(
         queuedUrl => url === queuedUrl
       )
       // remove it from pending queue
       this.pendingQueue.splice(currentIndex, 1)
+      if (typeof this.next === 'function') {
+        this.next(result, page)
+      }
+      const tasks = [page.close()]
       if (this.urls.length) {
-        const tasks = this.urls
+        this.urls
           .splice(0, this.parallel - this.pendingQueue.length)
           .filter(Boolean)
-          .map(this.crawlPage)
-        await Promise.all([...tasks, page.close()])
+          .map(url => {
+            tasks.push(this.crawlPage(url))
+          })
       }
+      await Promise.all(tasks)
     } catch (error) {
       console.log(error)
     }

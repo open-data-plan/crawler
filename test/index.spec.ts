@@ -78,3 +78,27 @@ describe('queue', () => {
     expect(crawler.urls.length).toBe(0)
   })
 })
+
+describe('next', () => {
+  it('next', async () => {
+    const pageNames = ['test', 'demo']
+    const urls = pageNames.map(createPage)
+    const crawler = new Crawler({
+      parallel: 2,
+      next: (result, page) => {
+        if (!pageNames.includes('xxx')) {
+          pageNames.push('xxx')
+          crawler.queue(createPage('xxx'))
+        }
+      },
+      pageEvaluate: () => {
+        return document.querySelector('#node').innerHTML
+      }
+    })
+    crawler.queue(urls)
+    await crawler.launch()
+    const result = await crawler.start()
+    await crawler.close()
+    expect(result.length).toBe(3)
+  })
+})
