@@ -21,7 +21,6 @@ export default class Crawler {
   private parallel: number = 5
   private pageEvaluate: EvaluateFn
   private next: NextFunc
-  private pageId: number = 0
   private pages: PageResult[] = []
   private pendingQueue: string[] = []
   public urls: string[] = []
@@ -50,12 +49,10 @@ export default class Crawler {
       throw new TypeError('You should launch browser firstly')
     }
     try {
-      const pageId = this.pageId++
       const page = await this.browser.newPage()
       this.crawledUrlSet.add(url)
       await page.goto(url)
       const result = await page.evaluate(this.pageEvaluate)
-      await page.close()
       this.pages.push({
         url,
         result
@@ -68,10 +65,11 @@ export default class Crawler {
       // remove it from pending queue
       this.pendingQueue.splice(currentIndex, 1)
       if (this.urls.length) {
-        await this.urls
+        const tasks = this.urls
           .splice(0, this.parallel - this.pendingQueue.length)
           .filter(Boolean)
           .map(this.crawlPage)
+        await Promise.all([...tasks, page.close()])
       }
     } catch (error) {
       console.log(error)
