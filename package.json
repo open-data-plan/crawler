@@ -11,7 +11,7 @@
     "lint": "prettier --check *.{ts,js,css,json,md}",
     "lint:fix": "prettier --write *.{ts,js,css,json,md}",
     "preversion": "npm run build",
-    "prepublishOnly": "tsc"
+    "postversion": "npm publish"
   },
   "repository": {
     "type": "git",
