@@ -8,8 +8,8 @@
     "test": "jest",
     "prebuild": "npm test",
     "build": "tsc",
-    "lint": "prettier --check *.{ts,js,css,json,md}",
-    "lint:fix": "prettier --write *.{ts,js,css,json,md}",
+    "lint": "prettier --check *.{ts,js,json,md}",
+    "lint:fix": "prettier --write *.{ts,js,json,md}",
     "preversion": "npm run build",
     "postversion": "npm publish"
   },
