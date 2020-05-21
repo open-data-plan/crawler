@@ -10,17 +10,17 @@ const createPage = (id: string) => {
     reply: {
       status: 200,
       headers: { 'content-type': 'text/html' },
-      body: `<div id="node">${id}</div>`
-    }
+      body: `<div id="node">${id}</div>`,
+    },
   })
   return `http://localhost:9000/${id}`
 }
 
-beforeEach(done => {
+beforeEach((done) => {
   server.start(done)
 })
 
-afterEach(done => {
+afterEach((done) => {
   server.stop(done)
 })
 
@@ -29,7 +29,7 @@ describe('Crawler', () => {
     const crawler = new Crawler({
       pageEvaluate: () => {
         console.log(location.href)
-      }
+      },
     })
 
     expect(crawler).toBeInstanceOf(Crawler)
@@ -44,7 +44,7 @@ describe('launch and close', () => {
       parallel: 1,
       pageEvaluate: () => {
         return document.querySelector('#node').innerHTML
-      }
+      },
     })
     crawler.queue(urls)
     await crawler.launch()
@@ -57,11 +57,16 @@ describe('launch and close', () => {
 })
 
 describe('queue', () => {
+  it('should work if no pageEvaluate present', () => {
+    const crawler = new Crawler({})
+    crawler.queue('https://baidu.com')
+  })
+
   it('queue url', () => {
     const crawler = new Crawler({
       pageEvaluate: () => {
         return location.href
-      }
+      },
     })
     crawler.queue('https://baidu.com')
     expect(crawler.urls.length).toBe(1)
@@ -72,10 +77,16 @@ describe('queue', () => {
     const crawler = new Crawler({
       pageEvaluate: () => {
         console.log(location.href)
-      }
+      },
     })
     crawler.queue('baidu.com')
     expect(crawler.urls.length).toBe(0)
+
+    const queueInvalidUrl = () => {
+      // @ts-expect-error
+      crawler.queue({})
+    }
+    expect(queueInvalidUrl).toThrowError()
   })
 })
 
@@ -93,12 +104,58 @@ describe('next', () => {
       },
       pageEvaluate: () => {
         return document.querySelector('#node').innerHTML
-      }
+      },
     })
     crawler.queue(urls)
     await crawler.launch()
     const result = await crawler.start()
     await crawler.close()
     expect(result.length).toBe(3)
+  })
+})
+
+describe('start', () => {
+  it('should work when `start` directly', async () => {
+    const pageNames = ['test', 'demo']
+    const urls = pageNames.map(createPage)
+    const crawler = new Crawler({
+      parallel: 2,
+      next: (result, page) => {
+        if (!pageNames.includes('xxx')) {
+          pageNames.push('xxx')
+          crawler.queue(createPage('xxx'))
+        }
+      },
+      pageEvaluate: () => {
+        return document.querySelector('#node').innerHTML
+      },
+    })
+    const result = await crawler.start(urls)
+    await crawler.close()
+    expect(result.length).toBe(3)
+  })
+})
+
+describe('close', () => {
+  it('should work well', async () => {
+    const crawler = new Crawler({
+      parallel: 2,
+      pageEvaluate: () => {
+        return document.querySelector('#node').innerHTML
+      },
+    })
+
+    await crawler.launch()
+    await crawler.close()
+  })
+
+  it('should work well if no browser launch', async () => {
+    const crawler = new Crawler({
+      parallel: 2,
+      pageEvaluate: () => {
+        return document.querySelector('#node').innerHTML
+      },
+    })
+    await crawler.close()
   })
 })

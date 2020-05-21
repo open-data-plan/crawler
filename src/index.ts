@@ -4,7 +4,7 @@ export type NextFunc = (result: PageResult, page: Page) => void
 
 export interface CrawlerOptions {
   parallel?: number
-  pageEvaluate: EvaluateFn
+  pageEvaluate?: EvaluateFn
   next?: NextFunc
   [x: string]: any
 }
@@ -14,11 +14,12 @@ export interface PageResult {
   result: any
 }
 
+// eslint-disable-next-line
 const noop = () => {}
 
 export default class Crawler {
   private crawledUrlSet: Set<string> = new Set()
-  private parallel: number = 5
+  private parallel = 5
   private pageEvaluate: EvaluateFn
   private next: NextFunc
   private pages: PageResult[] = []
@@ -45,6 +46,7 @@ export default class Crawler {
   }
 
   private crawlPage = async (url: string): Promise<void> => {
+    /* istanbul ignore if */
     if (!this.browser) {
       throw new TypeError('You should launch browser firstly')
     }
@@ -55,14 +57,15 @@ export default class Crawler {
       const result = await page.evaluate(this.pageEvaluate)
       this.pages.push({
         url,
-        result
+        result,
       })
 
       const currentIndex = this.pendingQueue.findIndex(
-        queuedUrl => url === queuedUrl
+        (queuedUrl) => url === queuedUrl
       )
       // remove it from pending queue
       this.pendingQueue.splice(currentIndex, 1)
+      /* istanbul ignore else */
       if (typeof this.next === 'function') {
         this.next(result, page)
       }
@@ -71,14 +74,12 @@ export default class Crawler {
         this.urls
           .splice(0, this.parallel - this.pendingQueue.length)
           .filter(Boolean)
-          .map(url => {
+          .map((url) => {
             tasks.push(this.crawlPage(url))
           })
       }
       await Promise.all(tasks)
-    } catch (error) {
-      console.log(error)
-    }
+    } catch (error) {}
   }
 
   /**
@@ -86,12 +87,8 @@ export default class Crawler {
    * @param options LaunchOptions puppeteer launch options
    */
   public launch = async (options?: LaunchOptions): Promise<Browser> => {
-    try {
-      this.browser = await puppeteer.launch(options)
-      return this.browser
-    } catch (error) {
-      throw error
-    }
+    this.browser = await puppeteer.launch(options)
+    return this.browser
   }
 
   /**
@@ -104,10 +101,10 @@ export default class Crawler {
     }
     if (Array.isArray(urls)) {
       this.urls = this.urls.concat(urls.filter(this.checkUrl))
-      const invalidUrls = urls.filter(url => !this.checkUrl(url))
+      const invalidUrls = urls.filter((url) => !this.checkUrl(url))
       if (invalidUrls.length) {
         console.log('follow url(s) will be ignored:\n')
-        invalidUrls.map(url => {
+        invalidUrls.map((url) => {
           console.log(url)
         })
       }
@@ -122,19 +119,15 @@ export default class Crawler {
    * crawl queued urls
    */
   public start = async (urls?: string[] | string): Promise<PageResult[]> => {
-    try {
-      if (!this.browser) {
-        await this.launch()
-      }
-      if (urls) {
-        this.queue(urls)
-      }
-      this.pendingQueue = this.urls.splice(0, this.parallel).filter(Boolean)
-      await Promise.all(this.pendingQueue.map(this.crawlPage))
-      return this.pages
-    } catch (error) {
-      throw error
+    if (!this.browser) {
+      await this.launch()
     }
+    if (urls) {
+      this.queue(urls)
+    }
+    this.pendingQueue = this.urls.splice(0, this.parallel).filter(Boolean)
+    await Promise.all(this.pendingQueue.map(this.crawlPage))
+    return this.pages
   }
 
   /**
