@@ -33,7 +33,7 @@
     "@opd/eslint-config-pangu": "^1.2.0",
     "@opd/jest-preset-pangu": "^1.4.0",
     "@opd/prettier-config-pangu": "^1.2.0",
-    "@types/jest": "^25.2.3",
+    "@types/jest": "^26.0.0",
     "@types/puppeteer": "^3.0.0",
     "husky": "^4.2.5",
     "lint-staged": "^10.2.4",
