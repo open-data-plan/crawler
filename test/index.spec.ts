@@ -83,6 +83,7 @@ describe('queue', () => {
     expect(crawler.urls.length).toBe(0)
 
     const queueInvalidUrl = () => {
+      // eslint-disable-next-line
       // @ts-expect-error
       crawler.queue({})
     }
