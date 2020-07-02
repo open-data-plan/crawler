@@ -42,7 +42,7 @@
     "typescript": "^3.9.5"
   },
   "dependencies": {
-    "puppeteer": "^3.3.0"
+    "puppeteer": "^5.0.0"
   },
   "husky": {
     "hooks": {
