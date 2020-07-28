@@ -33,16 +33,15 @@
     "@opd/eslint-config-pangu": "^1.5.0",
     "@opd/jest-preset-pangu": "^1.5.0",
     "@opd/prettier-config-pangu": "^1.2.0",
-    "@types/jest": "^26.0.5",
     "@types/puppeteer": "^3.0.0",
     "husky": "^4.2.5",
     "lint-staged": "^10.2.11",
     "mock-http-server": "^1.4.2",
-    "regenerator-runtime": "^0.13.5",
+    "regenerator-runtime": "^0.13.7",
     "typescript": "^3.9.7"
   },
   "dependencies": {
-    "puppeteer": "^5.2.0"
+    "puppeteer": "^5.2.1"
   },
   "husky": {
     "hooks": {
