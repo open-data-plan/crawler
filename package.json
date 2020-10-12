@@ -7,7 +7,7 @@
     "pretest": "npm run lint",
     "test": "jest",
     "prebuild": "npm test",
-    "build": "tsc",
+    "build": "cross-env BABEL_ENV=commonjs babel src -d lib --extensions .ts,.tsx --delete-dir-on-start",
     "lint": "eslint . --ext=.ts && prettier --check *.{json,md}",
     "lint:fix": "eslint . --ext=.ts --fix && prettier --write *.{json,md}",
     "preversion": "npm run build",
@@ -29,11 +29,13 @@
   },
   "homepage": "https://github.com/open-data-plan/crawler#readme",
   "devDependencies": {
-    "@opd/babel-preset-lib": "^1.10.0",
+    "@babel/cli": "^7.11.6",
+    "@opd/babel-preset-lib": "^1.10.1",
     "@opd/eslint-config-pangu": "^1.10.0",
     "@opd/jest-preset-pangu": "^1.10.0",
     "@opd/prettier-config-pangu": "^1.8.7",
     "@types/puppeteer": "^3.0.2",
+    "cross-env": "^7.0.2",
     "husky": "^4.3.0",
     "lint-staged": "^10.3.0",
     "mock-http-server": "^1.4.2",
@@ -41,7 +43,9 @@
     "typescript": "^4.0.3"
   },
   "dependencies": {
-    "puppeteer": "^5.2.1"
+    "@babel/runtime": "^7.11.2",
+    "core-js": "^3.6.5",
+    "puppeteer": "^5.3.1"
   },
   "husky": {
     "hooks": {
@@ -65,7 +69,8 @@
   ],
   "prettier": "@opd/prettier-config-pangu",
   "eslintConfig": {
-    "extends": "@opd/eslint-config-pangu"
+    "extends": "@opd/eslint-config-pangu",
+    "ignorePatterns": "**/lib/*.js"
   },
   "jest": {
     "preset": "@opd/jest-preset-pangu"
