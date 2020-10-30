@@ -74,7 +74,7 @@ export default class Crawler {
         this.urls
           .splice(0, this.parallel - this.pendingQueue.length)
           .filter(Boolean)
-          .map((url) => {
+          .forEach((url) => {
             tasks.push(this.crawlPage(url))
           })
       }
@@ -104,9 +104,7 @@ export default class Crawler {
       const invalidUrls = urls.filter((url) => !this.checkUrl(url))
       if (invalidUrls.length) {
         console.log('follow url(s) will be ignored:\n')
-        invalidUrls.map((url) => {
-          console.log(url)
-        })
+        console.log(invalidUrls.join('\n'))
       }
     } else {
       throw new TypeError(
