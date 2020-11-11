@@ -43,14 +43,14 @@ describe('launch and close', () => {
     const crawler = new Crawler({
       parallel: 1,
       pageEvaluate: () => {
-        return document.querySelector('#node').innerHTML
+        return document.querySelector('#node')?.innerHTML
       },
     })
     crawler.queue(urls)
     await crawler.launch()
     const result = await crawler.start()
     await crawler.close()
-    result.map(({ url, result }) => {
+    result.forEach(({ url, result }) => {
       expect(url.includes(result)).toBeTruthy()
     })
   })
@@ -104,7 +104,7 @@ describe('next', () => {
         }
       },
       pageEvaluate: () => {
-        return document.querySelector('#node').innerHTML
+        return document.querySelector('#node')?.innerHTML
       },
     })
     crawler.queue(urls)
@@ -128,7 +128,7 @@ describe('start', () => {
         }
       },
       pageEvaluate: () => {
-        return document.querySelector('#node').innerHTML
+        return document.querySelector('#node')?.innerHTML
       },
     })
     const result = await crawler.start(urls)
@@ -142,7 +142,7 @@ describe('close', () => {
     const crawler = new Crawler({
       parallel: 2,
       pageEvaluate: () => {
-        return document.querySelector('#node').innerHTML
+        return document.querySelector('#node')?.innerHTML
       },
     })
 
@@ -154,7 +154,7 @@ describe('close', () => {
     const crawler = new Crawler({
       parallel: 2,
       pageEvaluate: () => {
-        return document.querySelector('#node').innerHTML
+        return document.querySelector('#node')?.innerHTML
       },
     })
     await crawler.close()
