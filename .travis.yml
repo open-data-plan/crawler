@@ -2,7 +2,7 @@ dist: xenial
 os: linux
 language: node_js
 node_js:
-  - lts
+  - node
 
 install:
   - npm install
