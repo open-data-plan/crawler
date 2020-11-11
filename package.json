@@ -35,7 +35,7 @@
     "@opd/eslint-config-pangu": "^1.11.6",
     "@opd/jest-preset-pangu": "^1.11.6",
     "@opd/prettier-config-pangu": "^1.8.7",
-    "@types/puppeteer": "^3.0.2",
+    "@types/puppeteer": "^5.4.0",
     "cross-env": "^7.0.2",
     "husky": "^4.3.0",
     "lint-staged": "^10.5.0",
