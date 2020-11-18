@@ -74,7 +74,14 @@
     "ignorePatterns": "**/lib/*.js"
   },
   "jest": {
-    "preset": "@opd/jest-preset-pangu"
+    "preset": "@opd/jest-preset-pangu",
+    "coverageReporters": [
+      "json",
+      "text",
+      "lcov",
+      "clover",
+      "cobertura"
+    ]
   },
   "babel": {
     "presets": [
