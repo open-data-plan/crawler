@@ -4,6 +4,7 @@
 
 [![node (scoped)](https://img.shields.io/node/v/@opd/crawler.svg)](https://www.npmjs.com/package/@opd/crawler)
 [![npm (scoped)](https://img.shields.io/npm/v/@opd/crawler.svg)](https://www.npmjs.com/package/@opd/crawler)
+![build](https://github.com/open-data-plan/crawler/workflows/build/badge.svg)
 [![Build Status](https://dev.azure.com/kagawagao/OPD/_apis/build/status/open-data-plan.crawler?branchName=master)](https://dev.azure.com/kagawagao/OPD/_build/latest?definitionId=3&branchName=master)
 [![Coverage Status](https://coveralls.io/repos/github/open-data-plan/crawler/badge.svg?branch=master)](https://coveralls.io/github/open-data-plan/crawler?branch=master)
 
