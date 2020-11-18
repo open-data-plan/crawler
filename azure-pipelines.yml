@@ -23,8 +23,6 @@ steps:
   - script: |
       npm install
       npm run build
-      npm i coveralls -D
-      cat ./coverage/lcov.info | coveralls
     displayName: 'npm install and build'
 
   - task: PublishCodeCoverageResults@1
