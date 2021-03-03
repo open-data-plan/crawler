@@ -1,6 +1,6 @@
 {
   "name": "@opd/crawler",
-  "version": "1.3.2",
+  "version": "1.4.0",
   "description": "web crawler based on Puppeteer",
   "main": "lib/index.js",
   "scripts": {
