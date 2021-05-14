@@ -25,7 +25,7 @@ afterEach((done) => {
 })
 
 describe('Crawler', () => {
-  it('new', async () => {
+  it('new', () => {
     const crawler = new Crawler({
       pageEvaluate: () => {
         console.log(location.href)
