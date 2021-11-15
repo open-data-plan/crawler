@@ -46,7 +46,7 @@
   "dependencies": {
     "@babel/runtime": "^7.12.1",
     "core-js": "^3.6.5",
-    "puppeteer": "^10.1.0"
+    "puppeteer": "^11.0.0"
   },
   "husky": {
     "hooks": {
