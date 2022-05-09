@@ -37,7 +37,7 @@
     "@opd/prettier-config-pangu": "^1.12.1",
     "@types/puppeteer": "^5.4.0",
     "cross-env": "^7.0.2",
-    "husky": "^7.0.0",
+    "husky": "^8.0.1",
     "lint-staged": "^12.0.2",
     "mock-http-server": "^1.4.2",
     "regenerator-runtime": "^0.13.7",
