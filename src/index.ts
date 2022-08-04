@@ -1,10 +1,15 @@
-import puppeteer, { LaunchOptions, Browser, EvaluateFn, Page } from 'puppeteer'
+import puppeteer, {
+  LaunchOptions,
+  Browser,
+  Page,
+  EvaluateFunc,
+} from 'puppeteer'
 
 export type NextFunc = (result: PageResult, page: Page) => void
 
 export interface CrawlerOptions {
   parallel?: number
-  pageEvaluate?: EvaluateFn
+  pageEvaluate?: EvaluateFunc<any>
   next?: NextFunc
   [x: string]: any
 }
@@ -20,7 +25,7 @@ const noop = () => {}
 export default class Crawler {
   private crawledUrlSet: Set<string> = new Set()
   private parallel = 5
-  private pageEvaluate: EvaluateFn
+  private pageEvaluate: EvaluateFunc<any>
   private next: NextFunc
   private pages: PageResult[] = []
   private pendingQueue: string[] = []
@@ -67,7 +72,7 @@ export default class Crawler {
       this.pendingQueue.splice(currentIndex, 1)
       /* istanbul ignore else */
       if (typeof this.next === 'function') {
-        this.next(result, page)
+        this.next(result as PageResult, page)
       }
       const tasks = [page.close()]
       if (this.urls.length) {
