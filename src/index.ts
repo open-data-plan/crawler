@@ -92,7 +92,10 @@ export default class Crawler {
    * @param options LaunchOptions puppeteer launch options
    */
   public launch = async (options?: LaunchOptions): Promise<Browser> => {
-    this.browser = await puppeteer.launch(options)
+    this.browser = await puppeteer.launch({
+      headless: 'new',
+      ...options,
+    })
     return this.browser
   }
 
